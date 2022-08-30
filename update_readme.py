@@ -7,6 +7,7 @@ import git  # pip install GitPython
 
 ROOT = Path(__file__).parent.resolve()
 SECTION_REGEX = re.compile(r"<!-- index starts -->")
+URL_ROOT_FMT = "https://github.com/{user}/{repo}/tree/{commit_sha}"
 
 
 def find_section(find_regex: re.Pattern[str], lines: typing.Iterable[str]) -> int:
@@ -21,14 +22,23 @@ def parse_commit_message(commit: git.Commit) -> str:
     return commit.message.replace("commit: ", "").replace("commit (initial): ", "")
 
 
+def build_list_item(commit: git.Commit, user: str, repo_name: str) -> str:
+    """
+    Return the URL for the commit
+    """
+    url = URL_ROOT_FMT.format(user=user, repo=repo_name, commit_sha=commit.newhexsha)
+    list_item_label = parse_commit_message(commit)
+    return f"* [{list_item_label}]({url})"
+
+
 def get_updated_commits(
-    readme_lines: typing.Iterable[str], git_log: git.RefLog
+    readme_lines: typing.Iterable[str], git_log: git.RefLog, user: str, repo: str
 ) -> typing.List[str]:
     """
     Parse commit log and build hyperlinks in README
     """
     updates = [
-        f"* [{parse_commit_message(commit)}]({commit.newhexsha})"
+        build_list_item(commit, user, repo)
         for commit in git_log
         if "commit" in commit.message
         and "[doc]" not in commit.message
@@ -38,7 +48,7 @@ def get_updated_commits(
     return "\n".join(updates)
 
 
-def main():
+def main(user: str, repo_name: str) -> None:
     """
     Parse commit log and build hyperlinks in README
     """
@@ -50,7 +60,7 @@ def main():
     readme_lines = readme.open().readlines()
 
     # parse commit log
-    updated_commits = get_updated_commits(readme_lines, ref_log)
+    updated_commits = get_updated_commits(readme_lines, ref_log, user, repo_name)
 
     # find the index of the section to update based on the regex
     section_start = find_section(SECTION_REGEX, readme_lines)
@@ -65,4 +75,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 3:
+        sys.exit("Usage: update_readme.py <username> <repo>")
+    main(user=sys.argv[1], repo_name=sys.argv[2])

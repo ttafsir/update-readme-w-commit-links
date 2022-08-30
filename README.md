@@ -4,4 +4,4 @@ The script is run from the root of the repository and updates the README.md file
 
 # Progress
 <!-- index starts -->
-* [Initial commit](ebc950968c79b18d9b47fc4429353ff033921016)
+* [Initial commit](https://github.com/ttafsir/update-readme-w-commit-links/tree/ebc950968c79b18d9b47fc4429353ff033921016)

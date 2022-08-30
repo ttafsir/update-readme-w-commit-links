@@ -7,7 +7,7 @@ import git  # pip install GitPython
 
 ROOT = Path(__file__).parent.resolve()
 SECTION_REGEX = re.compile(r"<!-- index starts -->")
-URL_ROOT_FMT = "https://github.com/{user}/{repo}/tree/{commit_sha}"
+URL_ROOT_FMT = "https://github.com/{repo}/tree/{commit_sha}"
 
 
 def find_section(find_regex: re.Pattern[str], lines: typing.Iterable[str]) -> int:
@@ -76,5 +76,8 @@ def main(user: str, repo_name: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        sys.exit("Usage: update_readme.py <username> <repo>")
+        sys.exit(
+            "Usage: update_readme.py <repo_name>.\n"
+            "Example: update_readme.py octocat/hello-world"
+        )
     main(user=sys.argv[1], repo_name=sys.argv[2])
